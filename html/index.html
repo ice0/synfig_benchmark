@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+    <script src="benchmark.js"></script>    
+</head>
+<body>
+    <h1>test</h1>
+
+    <div id="chart-container" class="chart-container" style="display: block;width: 759px;height: 522px;">
+        <canvas id="bar-chart-horizontal" width="400" height="250"></canvas>
+    </div>    
+
+    <script>
+        console.log(data);
+
+        /*result = data.reduce(function (r, a) {
+            r[a.test] = r[a.test] || [];
+            r[a.test].push(a);
+            return r;
+        }, Object.create(null));*/
+
+        function groupBy(array, f) {
+            var groups = {};
+            array.forEach( function(o) {
+                var group = JSON.stringify( f(o) );
+                groups[group] = groups[group] || [];
+                groups[group].push( o );  
+            });
+            return Object.keys(groups).map(function(group) {
+                return groups[group]; 
+            })
+        }
+
+        var result = groupBy(data, function(item) {
+            return [item.test, item.resolution];
+        });        
+
+        console.log(result);
+
+        chartsHtml = '';
+        for (i=0; i < result.length; i++) {
+            chartsHtml += '<p style="padding-top: 80px;"><canvas id="chart'+i+'"></canvas></p>';
+        }
+
+        document.getElementById("chart-container").innerHTML = chartsHtml;
+
+        function add_chart(work_data, chart_name) {
+            labels = [];
+            label = work_data[0].test + " (" + work_data[0].resolution + ")";
+            values = [];
+
+            for (var i=0; i < work_data.length; i++) {
+                var v = work_data[i];
+                labels.push(v.app);
+                values.push(v.elapsed_time / 1000);
+                console.log(v);
+            }
+            console.log(labels);
+            console.log(label);
+            console.log(values);
+
+            new Chart(document.getElementById(chart_name), {
+                type: 'horizontalBar',
+                data: {
+                labels: labels, //["Africa", "Asia", "Europe", "Latin America", "North America"],
+                datasets: [
+                    {
+                    //label: "Population (millions)",
+                    label: "Elapsed time in ms",
+                    backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+                    //data: [2478,5267,734,784,433]
+                    data: values
+                    }
+                ]
+                },
+                options: {
+                    scales: {
+                xAxes: [{
+                    ticks: {
+                        beginAtZero:true
+                    }
+                }]
+            },
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: label //'Predicted world population (millions) in 2050'
+                }
+                }
+            });        
+
+        }
+
+
+        for (i=0;i<result.length;i++) {
+            add_chart(result[i], "chart" + i);
+            console.log("adding: " + i);
+        }
+
+        //work_data = result[1];
+
+    </script>
+</body>
+</html>

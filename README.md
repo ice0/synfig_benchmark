@@ -1,0 +1,1 @@
+# synfig_benchmark
